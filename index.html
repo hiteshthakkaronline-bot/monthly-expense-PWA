@@ -6,47 +6,75 @@
     <title>Family Expense Tracker</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        :root { --primary: #2563eb; --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --muted: #6b7280; --danger: #ef4444; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; }
+        /* Light Mode (Default) Variables */
+        :root { 
+            --primary: #2563eb; 
+            --bg: #f3f4f6; 
+            --card: #ffffff; 
+            --text: #1f2937; 
+            --muted: #6b7280; 
+            --danger: #ef4444;
+            --input-bg: #ffffff;
+            --border: #d1d5db;
+        }
+
+        /* Dark Mode Variables */
+        [data-theme="dark"] {
+            color-scheme: dark; /* Tells the browser to style native dropdowns/scrollbars dark */
+            --primary: #3b82f6; 
+            --bg: #111827; 
+            --card: #1f2937; 
+            --text: #f9fafb; 
+            --muted: #9ca3af; 
+            --input-bg: #374151;
+            --border: #4b5563;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; transition: background-color 0.3s ease, color 0.3s ease; }
         
-        /* Screen Size Agnostic Container */
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding-bottom: 80px; box-sizing: border-box; }
         
-        .card { background-color: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .card { background-color: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: background-color 0.3s ease; }
         h2 { margin-top: 0; font-size: 1.2rem; }
         
         .progress-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; margin-top: 15px; }
-        .progress-bar { width: 100%; height: 10px; background-color: #e5e7eb; border-radius: 5px; overflow: hidden; }
+        .progress-bar { width: 100%; height: 10px; background-color: var(--border); border-radius: 5px; overflow: hidden; }
         .progress-fill { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.5s ease, background-color 0.3s ease; }
         .progress-fill.time { background-color: #10b981; }
 
         label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--muted); font-size: 0.9rem; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
-        button.primary-btn { width: 100%; padding: 14px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
-        button.cancel-btn { width: 100%; padding: 14px; background-color: transparent; color: var(--muted); border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; display: none; }
+        
+        /* Updated Input to use variables for Dark Mode */
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; box-sizing: border-box; background-color: var(--input-bg); color: var(--text); }
+        input:focus { outline: none; border-color: var(--primary); }
+        
+        button.primary-btn { width: 100%; padding: 14px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        button.cancel-btn { width: 100%; padding: 14px; background-color: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; display: none; }
         button:disabled { opacity: 0.7; cursor: not-allowed; }
         
-        .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+        .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .expense-item:last-child { border-bottom: none; }
         .expense-details { flex-grow: 1; }
-        .expense-title { font-weight: 600; font-size: 1rem; }
+        .expense-title { font-weight: 600; font-size: 1rem; color: var(--text); }
         .expense-amount { font-weight: 600; color: var(--text); }
         .expense-meta { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
         
         button.edit-btn { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin-right: 5px; }
         button.delete-btn { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
         
-        /* Floating Scroll to Top Button */
         .scroll-top-btn { position: fixed; bottom: 30px; right: 30px; background-color: var(--primary); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000; border: none; }
         
         #status-msg { text-align: center; font-size: 0.9rem; margin-top: 10px; color: #10b981; min-height: 20px; }
         #login-section { text-align: center; }
         #app-section { display: none; }
         
-        /* Top Navigation Header */
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .nav-actions { display: flex; align-items: center; gap: 15px; }
         .user-badge { font-size: 0.85rem; color: var(--muted); }
         .logout-link { background: none; border: none; color: var(--danger); font-size: 0.85rem; cursor: pointer; padding: 0; font-weight: 600; text-decoration: underline; }
+        
+        /* New Theme Toggle Button */
+        .theme-toggle-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; color: var(--text); }
     </style>
 </head>
 <body>
@@ -62,7 +90,10 @@
             
             <div class="top-nav">
                 <div class="user-badge" id="user-display"></div>
-                <button class="logout-link" id="logout-btn">Log out</button>
+                <div class="nav-actions">
+                    <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+                    <button class="logout-link" id="logout-btn">Log out</button>
+                </div>
             </div>
 
             <div class="card">
@@ -104,6 +135,44 @@
         let currentUserEmail = '';
         let editingTransactionId = null; 
 
+        // --- THEME ENGINE (Dark/Light Mode) ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            themeToggleBtn.innerText = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function initTheme() {
+            // 1. Check if user manually saved a preference before
+            const savedTheme = localStorage.getItem('app_theme');
+            if (savedTheme) {
+                applyTheme(savedTheme);
+            } else {
+                // 2. If no manual preference, auto-detect device system setting
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                applyTheme(systemPrefersDark ? 'dark' : 'light');
+            }
+        }
+
+        // Toggle button click listener
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('app_theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        // Listen for OS-level theme changes in real-time (if user hasn't manually overridden)
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (!localStorage.getItem('app_theme')) {
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+
+        // Run on load
+        initTheme();
+
         // --- AUTH ---
         function decodeJwtResponse(token) {
             let base64Url = token.split('.')[1];
@@ -132,7 +201,6 @@
             }
         }
         
-        // Updated Logout Listener attached to the new text button
         document.getElementById('logout-btn').addEventListener('click', () => {
             if(confirm("Log out of the app?")) { localStorage.clear(); location.reload(); }
         });
@@ -195,7 +263,7 @@
                         list.appendChild(itemDiv);
                     });
                 }
-            } catch (error) { document.getElementById('expense-list').innerHTML = '<p style="color: red; text-align: center;">Failed to load.</p>'; }
+            } catch (error) { document.getElementById('expense-list').innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load.</p>'; }
         }
 
         // --- EDIT STATE HANDLERS ---
@@ -271,11 +339,11 @@
                     await Promise.all([loadCategories(), loadDashboardData(), loadExpenses()]);
                 } else {
                     statusMsg.innerText = 'Error: ' + result.message;
-                    statusMsg.style.color = 'red';
+                    statusMsg.style.color = 'var(--danger)';
                 }
             } catch (error) {
                 statusMsg.innerText = 'Network error.';
-                statusMsg.style.color = 'red';
+                statusMsg.style.color = 'var(--danger)';
             } finally {
                 btn.disabled = false;
                 if (!editingTransactionId) btn.innerText = 'Save Expense';
@@ -286,7 +354,6 @@
         // --- SCROLL TO TOP LOGIC ---
         const scrollBtn = document.getElementById('scroll-top-btn');
         window.onscroll = function() {
-            // Show button if scrolled down more than 300px
             if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
                 scrollBtn.style.display = "flex";
             } else {
