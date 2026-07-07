@@ -29,7 +29,7 @@
         /* Dark Mode Variables */
         [data-theme="dark"] {
             color-scheme: dark; /* Tells the browser to style native dropdowns/scrollbars dark */
-            --primary: #3b82f6; 
+            --primary: #3b82f6;
             --bg: #111827; 
             --card: #1f2937; 
             --text: #f9fafb; 
@@ -76,13 +76,18 @@
         #login-section { text-align: center; }
         #app-section { display: none; }
         
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .nav-actions { display: flex; align-items: center; gap: 15px; }
-        .user-badge { font-size: 0.85rem; color: var(--muted); }
-        .logout-link { background: none; border: none; color: var(--danger); font-size: 0.85rem; cursor: pointer; padding: 0; font-weight: 600; text-decoration: underline; }
+        /* --- Modern Top Navigation --- */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .user-profile { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 38px; height: 38px; background-color: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; }
+        .greeting-text { display: flex; flex-direction: column; justify-content: center; }
+        .greeting-sub { font-size: 0.75rem; color: var(--muted); line-height: 1; margin-bottom: 3px; }
+        .greeting-name { font-size: 1.05rem; font-weight: 600; color: var(--text); line-height: 1; }
         
-        /* New Theme Toggle Button */
-        .theme-toggle-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; color: var(--text); }
+        .nav-actions { display: flex; align-items: center; gap: 12px; }
+        .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 4px; color: var(--text); display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
+        .icon-btn:hover { opacity: 0.7; }
+        .logout-icon { color: var(--danger); }
     </style>
 </head>
 <body>
@@ -95,12 +100,25 @@
         </div>
 
         <div id="app-section">
-            
+           
             <div class="top-nav">
-                <div class="user-badge" id="user-display"></div>
+                <div class="user-profile">
+                    <div class="avatar" id="user-avatar">?</div>
+                    <div class="greeting-text">
+                        <span class="greeting-sub">Hello,</span>
+                        <span class="greeting-name"><span id="user-name-display">User</span> 👋</span>
+                    </div>
+                </div>
+                
                 <div class="nav-actions">
-                    <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
-                    <button class="logout-link" id="logout-btn">Log out</button>
+                    <button class="icon-btn" id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+                    <button class="icon-btn logout-icon" id="logout-btn" title="Log out" aria-label="Log out">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -108,6 +126,7 @@
                 <h2>Monthly Overview</h2>
                 <div class="progress-label"><span>Time Elapsed</span><span id="time-percent">0%</span></div>
                 <div class="progress-bar"><div class="progress-fill time" id="time-fill"></div></div>
+      
                 <div class="progress-label"><span id="budget-label">Budget Spent</span><span id="budget-percent">0%</span></div>
                 <div class="progress-bar"><div class="progress-fill" id="budget-fill"></div></div>
             </div>
@@ -115,18 +134,21 @@
             <div class="card">
                 <h2 id="form-title">Log Expense</h2>
                 <form id="expense-form">
-                    <label for="category">Category / Item</label>
+       
+                     <label for="category">Category / Item</label>
                     <input type="text" id="category" list="category-suggestions" required autocomplete="off" placeholder="e.g., Groceries">
                     <datalist id="category-suggestions"></datalist>
 
                     <label for="amount">Amount (₹)</label>
+              
                     <input type="number" id="amount" required placeholder="0.00" step="0.01">
 
                     <button type="submit" id="submit-btn" class="primary-btn">Save Expense</button>
                     <button type="button" id="cancel-edit-btn" class="cancel-btn" onclick="cancelEdit()">Cancel Edit</button>
                     <div id="status-msg"></div>
                 </form>
-            </div>
+   
+             </div>
             
             <div class="card">
                 <h2>Recent Transactions</h2>
@@ -144,6 +166,7 @@
         let editingTransactionId = null; 
 
         // --- THEME ENGINE (Dark/Light Mode) ---
+   
         const themeToggleBtn = document.getElementById('theme-toggle');
         
         function applyTheme(theme) {
@@ -153,6 +176,7 @@
 
         function initTheme() {
             // 1. Check if user manually saved a preference before
+  
             const savedTheme = localStorage.getItem('app_theme');
             if (savedTheme) {
                 applyTheme(savedTheme);
@@ -169,7 +193,8 @@
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             localStorage.setItem('app_theme', newTheme);
             applyTheme(newTheme);
-        });
+   
+         });
 
         // Listen for OS-level theme changes in real-time (if user hasn't manually overridden)
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
@@ -177,10 +202,10 @@
                 applyTheme(e.matches ? 'dark' : 'light');
             }
         });
-
+        
         // Run on load
         initTheme();
-
+        
         // --- AUTH ---
         function decodeJwtResponse(token) {
             let base64Url = token.split('.')[1];
@@ -197,8 +222,16 @@
         function showAppInterface() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('app-section').style.display = 'block';
-            document.getElementById('user-display').innerText = `Logged in as: ${localStorage.getItem('active_user_name')} (${currentUserEmail})`;
-            calculateTimeElapsed(); loadCategories(); loadDashboardData(); loadExpenses();
+            
+            // Grab the user's name, set the greeting and the Avatar initial
+            const userName = localStorage.getItem('active_user_name') || 'User';
+            document.getElementById('user-name-display').innerText = userName;
+            document.getElementById('user-avatar').innerText = userName.charAt(0);
+            
+            calculateTimeElapsed(); 
+            loadCategories(); 
+            loadDashboardData(); 
+            loadExpenses();
         }
         function initGoogleAuth() {
             const savedEmail = localStorage.getItem('active_user_email');
@@ -212,7 +245,7 @@
         document.getElementById('logout-btn').addEventListener('click', () => {
             if(confirm("Log out of the app?")) { localStorage.clear(); location.reload(); }
         });
-
+        
         // --- UI UPDATES ---
         function calculateTimeElapsed() {
             const today = new Date();
@@ -226,12 +259,14 @@
                 const res = await fetch(`${API_URL}?action=getDashboardData`);
                 const result = await res.json();
                 if (result.status === 'success') {
-                    const percentSpent = result.budgetThreshold > 0 ? Math.round((result.totalSpent / result.budgetThreshold) * 100) : 0;
+                    const percentSpent = result.budgetThreshold > 0 ?
+                        Math.round((result.totalSpent / result.budgetThreshold) * 100) : 0;
                     document.getElementById('budget-label').innerText = `Budget Spent (₹${result.totalSpent} / ₹${result.budgetThreshold})`;
                     document.getElementById('budget-percent').innerText = `${percentSpent}%`;
                     const fillBar = document.getElementById('budget-fill');
                     fillBar.style.width = `${Math.min(percentSpent, 100)}%`;
-                    fillBar.style.backgroundColor = percentSpent >= 100 ? '#ef4444' : (percentSpent >= 80 ? '#f59e0b' : 'var(--primary)');
+                    fillBar.style.backgroundColor = percentSpent >= 100 ?
+                        '#ef4444' : (percentSpent >= 80 ? '#f59e0b' : 'var(--primary)');
                 }
             } catch (error) {}
         }
@@ -243,35 +278,40 @@
                 const list = document.getElementById('expense-list');
                 
                 if (result.status === 'success') {
-                    list.innerHTML = ''; 
-                    if (result.data.length === 0) { list.innerHTML = '<p style="font-size: 0.9rem; text-align: center;">No expenses logged yet.</p>'; return; }
+                    list.innerHTML = '';
+                    if (result.data.length === 0) { list.innerHTML = '<p style="font-size: 0.9rem; text-align: center;">No expenses logged yet.</p>'; return;
+                    }
                     
                     result.data.forEach(exp => {
                         const dateObj = new Date(exp.timestamp);
-                        const cleanDate = `${dateObj.getDate()}/${dateObj.getMonth()+1} • ${dateObj.getHours()}:${dateObj.getMinutes() < 10 ? '0' : ''}${dateObj.getMinutes()}`;
+                        const cleanDate = `${dateObj.getDate()}/${dateObj.getMonth()+1} • ${dateObj.getHours()}:${dateObj.getMinutes() 
+                            < 10 ? '0' : ''}${dateObj.getMinutes()}`;
                         
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'expense-item';
-                        
+                  
                         let html = `
                             <div class="expense-details">
                                 <div class="expense-title">${exp.category} <span class="expense-amount">₹${exp.amount}</span></div>
+   
                                 <div class="expense-meta">${cleanDate} • By: ${exp.userEmail.split('@')[0]}</div>
                             </div>
                         `;
-                        
+               
                         if (exp.userEmail === currentUserEmail) {
-                            const safeCategory = exp.category.replace(/'/g, "\\'"); 
+                            const safeCategory = exp.category.replace(/'/g, "\\'");
                             html += `<div>
                                         <button class="edit-btn" onclick="startEdit('${exp.id}', '${safeCategory}', ${exp.amount})">Edit</button>
                                         <button class="delete-btn" onclick="deleteExpense('${exp.id}', this)">Delete</button>
-                                     </div>`;
+           
+                                    </div>`;
                         }
                         itemDiv.innerHTML = html;
                         list.appendChild(itemDiv);
                     });
                 }
-            } catch (error) { document.getElementById('expense-list').innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load.</p>'; }
+            } catch (error) { document.getElementById('expense-list').innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load.</p>';
+            }
         }
 
         // --- EDIT STATE HANDLERS ---
@@ -283,7 +323,6 @@
             document.getElementById('form-title').innerText = 'Edit Expense';
             document.getElementById('submit-btn').innerText = 'Update Expense';
             document.getElementById('cancel-edit-btn').style.display = 'block';
-            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -301,10 +340,12 @@
             try {
                 const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteExpense', transactionId: id, userEmail: currentUserEmail }) });
                 if ((await res.json()).status === 'success') { loadDashboardData(); loadExpenses(); } 
-                else { alert("Error deleting"); btn.innerText = "Delete"; btn.disabled = false; }
-            } catch (e) { alert("Network error"); btn.innerText = "Delete"; btn.disabled = false; }
+                else { alert("Error deleting");
+                btn.innerText = "Delete"; btn.disabled = false; }
+            } catch (e) { alert("Network error");
+                btn.innerText = "Delete"; btn.disabled = false; }
         };
-
+        
         // --- FORM SUBMIT & CATEGORIES ---
         async function loadCategories() { 
             const cachedCats = localStorage.getItem('expense_categories');
@@ -312,11 +353,13 @@
             try {
                 const res = await fetch(`${API_URL}?action=getCategories`);
                 const result = await res.json();
-                if (result.status === 'success') { localStorage.setItem('expense_categories', JSON.stringify(result.data)); populateDatalist(result.data); }
+                if (result.status === 'success') { localStorage.setItem('expense_categories', JSON.stringify(result.data)); populateDatalist(result.data);
+                }
             } catch (e) {}
         }
         function populateDatalist(categories) {
-            const dataList = document.getElementById('category-suggestions'); dataList.innerHTML = ''; 
+            const dataList = document.getElementById('category-suggestions');
+            dataList.innerHTML = ''; 
             categories.forEach(cat => { const opt = document.createElement('option'); opt.value = cat; dataList.appendChild(opt); });
         }
 
@@ -327,6 +370,7 @@
             
             btn.disabled = true;
             btn.innerText = editingTransactionId ? 'Updating...' : 'Saving...';
+  
             statusMsg.innerText = '';
 
             const payload = {
@@ -334,15 +378,17 @@
                 category: document.getElementById('category').value,
                 amount: document.getElementById('amount').value,
                 userEmail: currentUserEmail
-            };
+ 
+             };
             if (editingTransactionId) payload.transactionId = editingTransactionId;
 
             try {
                 const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const result = await res.json();
-                
+              
                 if (result.status === 'success') {
-                    statusMsg.innerText = editingTransactionId ? 'Expense updated!' : 'Expense saved!';
+                    statusMsg.innerText = editingTransactionId ?
+                        'Expense updated!' : 'Expense saved!';
                     cancelEdit(); 
                     await Promise.all([loadCategories(), loadDashboardData(), loadExpenses()]);
                 } else {
@@ -372,7 +418,7 @@
         scrollBtn.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-
+        
         window.onload = initGoogleAuth;
     </script>
 </body>
