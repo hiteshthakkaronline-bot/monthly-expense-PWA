@@ -12,6 +12,7 @@
             --card: #ffffff;
             --text: #1f2937;
             --muted: #6b7280;
+            --danger: #ef4444;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -27,6 +28,7 @@
             width: 100%;
             max-width: 400px;
             margin-top: 10px;
+            padding-bottom: 80px; /* Space for the floating button */
         }
         .card {
             background-color: var(--card);
@@ -37,6 +39,7 @@
         }
         h2 { margin-top: 0; font-size: 1.2rem; }
         
+        /* Progress Bars */
         .progress-label {
             display: flex;
             justify-content: space-between;
@@ -59,6 +62,7 @@
         }
         .progress-fill.time { background-color: #10b981; }
 
+        /* Forms */
         label {
             display: block;
             margin-bottom: 5px;
@@ -75,7 +79,7 @@
             font-size: 1rem;
             box-sizing: border-box;
         }
-        button {
+        button.primary-btn {
             width: 100%;
             padding: 14px;
             background-color: var(--primary);
@@ -86,8 +90,34 @@
             font-weight: bold;
             cursor: pointer;
         }
-        button:disabled { background-color: #9ca3af; }
+        button.primary-btn:disabled { background-color: #9ca3af; }
         
+        /* Transaction List */
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .expense-item:last-child { border-bottom: none; }
+        .expense-details { flex-grow: 1; }
+        .expense-title { font-weight: 600; font-size: 1rem; }
+        .expense-amount { font-weight: 600; color: var(--text); }
+        .expense-meta { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+        
+        button.delete-btn {
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        /* Menus & Auth */
         .fab-menu {
             position: fixed;
             bottom: 30px;
@@ -106,38 +136,29 @@
             z-index: 1000;
         }
         
-        #status-msg {
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            color: #10b981;
-            min-height: 20px;
-        }
+        #status-msg { text-align: center; font-size: 0.9rem; margin-top: 10px; color: #10b981; min-height: 20px; }
         #login-section { text-align: center; }
         #app-section { display: none; }
-        .user-badge {
-            font-size: 0.8rem;
-            color: var(--muted);
-            text-align: right;
-            margin-bottom: 15px;
-        }
+        .user-badge { font-size: 0.8rem; color: var(--muted); text-align: right; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- Authentication Section -->
         <div id="login-section" class="card">
             <h2>Welcome</h2>
             <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;">Please sign in to log family expenses.</p>
             <div id="google-btn-container" style="display: flex; justify-content: center;"></div>
         </div>
 
+        <!-- Main App Section -->
         <div id="app-section">
             <div class="user-badge" id="user-display"></div>
 
+            <!-- Dashboard Card -->
             <div class="card">
                 <h2>Monthly Overview</h2>
-                
                 <div class="progress-label">
                     <span>Time Elapsed</span>
                     <span id="time-percent">0%</span>
@@ -147,7 +168,7 @@
                 </div>
 
                 <div class="progress-label">
-                    <span id="budget-label">Budget Spent (₹0 / ₹0)</span>
+                    <span id="budget-label">Budget Spent</span>
                     <span id="budget-percent">0%</span>
                 </div>
                 <div class="progress-bar">
@@ -155,6 +176,7 @@
                 </div>
             </div>
 
+            <!-- Entry Card -->
             <div class="card">
                 <h2>Log Expense</h2>
                 <form id="expense-form">
@@ -165,9 +187,17 @@
                     <label for="amount">Amount (₹)</label>
                     <input type="number" id="amount" required placeholder="0.00" step="0.01">
 
-                    <button type="submit" id="submit-btn">Save Expense</button>
+                    <button type="submit" id="submit-btn" class="primary-btn">Save Expense</button>
                     <div id="status-msg"></div>
                 </form>
+            </div>
+            
+            <!-- Recent Transactions Card -->
+            <div class="card">
+                <h2>Recent Transactions</h2>
+                <div id="expense-list">
+                    <p style="font-size: 0.9rem; color: var(--muted); text-align: center;">Loading transactions...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -208,6 +238,7 @@
             calculateTimeElapsed();
             loadCategories();
             loadDashboardData(); 
+            loadExpenses();
         }
 
         function initGoogleAuth() {
@@ -256,28 +287,106 @@
                     const threshold = result.budgetThreshold;
                     const percentSpent = threshold > 0 ? Math.round((totalSpent / threshold) * 100) : 0;
                     
-                    // Update Text
                     document.getElementById('budget-label').innerText = `Budget Spent (₹${totalSpent} / ₹${threshold})`;
                     document.getElementById('budget-percent').innerText = `${percentSpent}%`;
                     
-                    // Update Progress Fill Bar (Cap width at 100% maximum so it doesn't spill out)
                     const fillBar = document.getElementById('budget-fill');
                     fillBar.style.width = `${Math.min(percentSpent, 100)}%`;
                     
-                    // Dynamic Color Warning Rules
                     if (percentSpent >= 100) {
-                        fillBar.style.backgroundColor = '#ef4444'; // Red if exceeded
+                        fillBar.style.backgroundColor = '#ef4444'; 
                     } else if (percentSpent >= 80) {
-                        fillBar.style.backgroundColor = '#f59e0b'; // Amber if close
+                        fillBar.style.backgroundColor = '#f59e0b'; 
                     } else {
-                        fillBar.style.backgroundColor = 'var(--primary)'; // Standard Blue
+                        fillBar.style.backgroundColor = 'var(--primary)'; 
                     }
                 }
-            } catch (error) {
-                console.error("Error loading dashboard numbers:", error);
-            }
+            } catch (error) { console.error("Error loading dashboard numbers:", error); }
         }
 
+        // --- 4. EXPENSE LIST & DELETE LOGIC ---
+        async function loadExpenses() {
+            try {
+                const response = await fetch(`${API_URL}?action=getExpenses`);
+                const result = await response.json();
+                const listContainer = document.getElementById('expense-list');
+                
+                if (result.status === 'success') {
+                    listContainer.innerHTML = ''; // Clear loading text
+                    
+                    if (result.data.length === 0) {
+                        listContainer.innerHTML = '<p style="font-size: 0.9rem; color: var(--muted); text-align: center;">No expenses logged this month yet.</p>';
+                        return;
+                    }
+                    
+                    result.data.forEach(exp => {
+                        // Extract just the time or a clean date string for the UI
+                        const dateObj = new Date(exp.timestamp);
+                        const cleanDate = `${dateObj.getDate()}/${dateObj.getMonth()+1} • ${dateObj.getHours()}:${dateObj.getMinutes() < 10 ? '0' : ''}${dateObj.getMinutes()}`;
+                        
+                        // Extract just the name from the email (e.g., "hitesh" from hitesh@gmail.com)
+                        const userName = exp.userEmail.split('@')[0];
+                        
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'expense-item';
+                        
+                        // Build inner HTML
+                        let html = `
+                            <div class="expense-details">
+                                <div class="expense-title">${exp.category} <span class="expense-amount">₹${exp.amount}</span></div>
+                                <div class="expense-meta">${cleanDate} • Logged by: ${userName}</div>
+                            </div>
+                        `;
+                        
+                        // Add delete button ONLY if the logged in user owns it
+                        if (exp.userEmail === currentUserEmail) {
+                            html += `<button class="delete-btn" onclick="deleteExpense('${exp.id}', this)">Delete</button>`;
+                        }
+                        
+                        itemDiv.innerHTML = html;
+                        listContainer.appendChild(itemDiv);
+                    });
+                }
+            } catch (error) {
+                document.getElementById('expense-list').innerHTML = '<p style="color: red; text-align: center;">Failed to load transactions.</p>';
+            }
+        }
+        
+        // Expose function globally for the onclick handler
+        window.deleteExpense = async function(transactionId, btnElement) {
+            if (!confirm("Are you sure you want to delete this expense?")) return;
+            
+            btnElement.innerText = "Deleting...";
+            btnElement.disabled = true;
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'deleteExpense',
+                        transactionId: transactionId,
+                        userEmail: currentUserEmail
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    // Refresh data
+                    loadDashboardData();
+                    loadExpenses();
+                } else {
+                    alert("Error: " + result.message);
+                    btnElement.innerText = "Delete";
+                    btnElement.disabled = false;
+                }
+            } catch (error) {
+                alert("Network error while deleting.");
+                btnElement.innerText = "Delete";
+                btnElement.disabled = false;
+            }
+        };
+
+        // --- 5. CATEGORIES & SUBMISSION ---
         function populateDatalist(categories) {
             const dataList = document.getElementById('category-suggestions');
             dataList.innerHTML = ''; 
@@ -291,7 +400,6 @@
         async function loadCategories() {
             const cachedCats = localStorage.getItem('expense_categories');
             if (cachedCats) populateDatalist(JSON.parse(cachedCats));
-
             try {
                 const response = await fetch(`${API_URL}?action=getCategories`);
                 const result = await response.json();
@@ -299,10 +407,9 @@
                     localStorage.setItem('expense_categories', JSON.stringify(result.data));
                     populateDatalist(result.data);
                 }
-            } catch (error) { console.error("Failed to fetch categories", error); }
+            } catch (error) { console.error("Failed to fetch categories"); }
         }
 
-        // --- 4. DATA SUBMISSION ---
         document.getElementById('expense-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -332,8 +439,8 @@
                     statusMsg.innerText = 'Expense saved successfully!';
                     document.getElementById('expense-form').reset();
                     
-                    // Instantly refresh the dashboard stats and auto-suggest cache
-                    await Promise.all([loadCategories(), loadDashboardData()]);
+                    // Instantly refresh all 3 components!
+                    await Promise.all([loadCategories(), loadDashboardData(), loadExpenses()]);
                 } else {
                     statusMsg.innerText = 'Error saving expense.';
                     statusMsg.style.color = 'red';
