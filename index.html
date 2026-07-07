@@ -7,8 +7,11 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         :root { --primary: #2563eb; --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --muted: #6b7280; --danger: #ef4444; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 400px; margin-top: 10px; padding-bottom: 80px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Screen Size Agnostic Container */
+        .container { width: 100%; max-width: 600px; margin: 0 auto; padding-bottom: 80px; box-sizing: border-box; }
+        
         .card { background-color: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         h2 { margin-top: 0; font-size: 1.2rem; }
         
@@ -33,11 +36,17 @@
         button.edit-btn { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin-right: 5px; }
         button.delete-btn { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
         
-        .fab-menu { position: fixed; bottom: 30px; right: 30px; background-color: var(--text); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000; }
+        /* Floating Scroll to Top Button */
+        .scroll-top-btn { position: fixed; bottom: 30px; right: 30px; background-color: var(--primary); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000; border: none; }
+        
         #status-msg { text-align: center; font-size: 0.9rem; margin-top: 10px; color: #10b981; min-height: 20px; }
         #login-section { text-align: center; }
         #app-section { display: none; }
-        .user-badge { font-size: 0.8rem; color: var(--muted); text-align: right; margin-bottom: 15px; }
+        
+        /* Top Navigation Header */
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .user-badge { font-size: 0.85rem; color: var(--muted); }
+        .logout-link { background: none; border: none; color: var(--danger); font-size: 0.85rem; cursor: pointer; padding: 0; font-weight: 600; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -50,7 +59,11 @@
         </div>
 
         <div id="app-section">
-            <div class="user-badge" id="user-display"></div>
+            
+            <div class="top-nav">
+                <div class="user-badge" id="user-display"></div>
+                <button class="logout-link" id="logout-btn">Log out</button>
+            </div>
 
             <div class="card">
                 <h2>Monthly Overview</h2>
@@ -83,13 +96,13 @@
         </div>
     </div>
 
-    <div class="fab-menu" id="logout-menu">☰</div>
+    <button class="scroll-top-btn" id="scroll-top-btn">↑</button>
 
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbzhnD3U5AB_I_MWx5uS5xEBMpxPTkbX9lgyZP66IO0Y96gshrDlJGLXjtl-ZWbXNA_Nyw/exec'; 
         const GOOGLE_CLIENT_ID = '670123200048-hqhborskt23c1bunn6flobse3cn0k83p.apps.googleusercontent.com';
         let currentUserEmail = '';
-        let editingTransactionId = null; // Tracks if form is in Edit Mode
+        let editingTransactionId = null; 
 
         // --- AUTH ---
         function decodeJwtResponse(token) {
@@ -118,7 +131,9 @@
                 google.accounts.id.renderButton(document.getElementById("google-btn-container"), { theme: "outline", size: "large", width: 250 });
             }
         }
-        document.getElementById('logout-menu').addEventListener('click', () => {
+        
+        // Updated Logout Listener attached to the new text button
+        document.getElementById('logout-btn').addEventListener('click', () => {
             if(confirm("Log out of the app?")) { localStorage.clear(); location.reload(); }
         });
 
@@ -169,9 +184,8 @@
                             </div>
                         `;
                         
-                        // Add Edit and Delete buttons if owned
                         if (exp.userEmail === currentUserEmail) {
-                            const safeCategory = exp.category.replace(/'/g, "\\'"); // escape quotes for inline handler
+                            const safeCategory = exp.category.replace(/'/g, "\\'"); 
                             html += `<div>
                                         <button class="edit-btn" onclick="startEdit('${exp.id}', '${safeCategory}', ${exp.amount})">Edit</button>
                                         <button class="delete-btn" onclick="deleteExpense('${exp.id}', this)">Delete</button>
@@ -194,7 +208,6 @@
             document.getElementById('submit-btn').innerText = 'Update Expense';
             document.getElementById('cancel-edit-btn').style.display = 'block';
             
-            // Smooth scroll to form
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -216,8 +229,8 @@
             } catch (e) { alert("Network error"); btn.innerText = "Delete"; btn.disabled = false; }
         };
 
-        // --- FORM SUBMIT (Handles both Add and Update) ---
-        async function loadCategories() { /* ... unchanged logic from previous ... */
+        // --- FORM SUBMIT & CATEGORIES ---
+        async function loadCategories() { 
             const cachedCats = localStorage.getItem('expense_categories');
             if (cachedCats) populateDatalist(JSON.parse(cachedCats));
             try {
@@ -254,7 +267,7 @@
                 
                 if (result.status === 'success') {
                     statusMsg.innerText = editingTransactionId ? 'Expense updated!' : 'Expense saved!';
-                    cancelEdit(); // Resets the form and state back to Add mode
+                    cancelEdit(); 
                     await Promise.all([loadCategories(), loadDashboardData(), loadExpenses()]);
                 } else {
                     statusMsg.innerText = 'Error: ' + result.message;
@@ -268,6 +281,21 @@
                 if (!editingTransactionId) btn.innerText = 'Save Expense';
                 setTimeout(() => statusMsg.innerText = '', 3000);
             }
+        });
+
+        // --- SCROLL TO TOP LOGIC ---
+        const scrollBtn = document.getElementById('scroll-top-btn');
+        window.onscroll = function() {
+            // Show button if scrolled down more than 300px
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                scrollBtn.style.display = "flex";
+            } else {
+                scrollBtn.style.display = "none";
+            }
+        };
+        
+        scrollBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
         window.onload = initGoogleAuth;
