@@ -284,17 +284,26 @@
                     
                     result.data.forEach(exp => {
                         const dateObj = new Date(exp.timestamp);
-                        const cleanDate = `${dateObj.getDate()}/${dateObj.getMonth()+1} • ${dateObj.getHours()}:${dateObj.getMinutes() 
-                            < 10 ? '0' : ''}${dateObj.getMinutes()}`;
+                        const cleanDate = `${dateObj.getDate()}/${dateObj.getMonth()+1} • ${dateObj.getHours()}:${dateObj.getMinutes() < 10 ? '0' : ''}${dateObj.getMinutes()}`;
                         
+                        // --- NEW NAME DISPLAY LOGIC ---
+                        let displayName = exp.userEmail.split('@')[0];
+                        if (exp.userEmail === currentUserEmail) {
+                            // If it's your entry, use your actual First Name
+                            displayName = localStorage.getItem('active_user_name') || displayName;
+                        } else {
+                            // For other family members, capitalize the first letter of their email prefix
+                            displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+                        }
+                        // ------------------------------
+
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'expense-item';
                   
                         let html = `
                             <div class="expense-details">
                                 <div class="expense-title">${exp.category} <span class="expense-amount">₹${exp.amount}</span></div>
-   
-                                <div class="expense-meta">${cleanDate} • By: ${exp.userEmail.split('@')[0]}</div>
+                                <div class="expense-meta">${cleanDate} • By: ${displayName}</div>
                             </div>
                         `;
                
@@ -303,7 +312,6 @@
                             html += `<div>
                                         <button class="edit-btn" onclick="startEdit('${exp.id}', '${safeCategory}', ${exp.amount})">Edit</button>
                                         <button class="delete-btn" onclick="deleteExpense('${exp.id}', this)">Delete</button>
-           
                                     </div>`;
                         }
                         itemDiv.innerHTML = html;
