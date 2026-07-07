@@ -6,136 +6,34 @@
     <title>Family Expense Tracker</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        :root {
-            --primary: #2563eb;
-            --bg: #f3f4f6;
-            --card: #ffffff;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --danger: #ef4444;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 400px;
-            margin-top: 10px;
-            padding-bottom: 80px; /* Space for the floating button */
-        }
-        .card {
-            background-color: var(--card);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
+        :root { --primary: #2563eb; --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --muted: #6b7280; --danger: #ef4444; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 400px; margin-top: 10px; padding-bottom: 80px; }
+        .card { background-color: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         h2 { margin-top: 0; font-size: 1.2rem; }
         
-        /* Progress Bars */
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            margin-top: 15px;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background-color: #e5e7eb;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background-color: var(--primary);
-            width: 0%; 
-            transition: width 0.5s ease, background-color 0.3s ease;
-        }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; margin-top: 15px; }
+        .progress-bar { width: 100%; height: 10px; background-color: #e5e7eb; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.5s ease, background-color 0.3s ease; }
         .progress-fill.time { background-color: #10b981; }
 
-        /* Forms */
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        button.primary-btn {
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button.primary-btn:disabled { background-color: #9ca3af; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--muted); font-size: 0.9rem; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        button.primary-btn { width: 100%; padding: 14px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        button.cancel-btn { width: 100%; padding: 14px; background-color: transparent; color: var(--muted); border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; display: none; }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
         
-        /* Transaction List */
-        .expense-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f3f4f6;
-        }
+        .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
         .expense-item:last-child { border-bottom: none; }
         .expense-details { flex-grow: 1; }
         .expense-title { font-weight: 600; font-size: 1rem; }
         .expense-amount { font-weight: 600; color: var(--text); }
         .expense-meta { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
         
-        button.delete-btn {
-            background-color: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            margin-left: 10px;
-        }
+        button.edit-btn { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin-right: 5px; }
+        button.delete-btn { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
         
-        /* Menus & Auth */
-        .fab-menu {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background-color: var(--text);
-            color: white;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            cursor: pointer;
-            z-index: 1000;
-        }
-        
+        .fab-menu { position: fixed; bottom: 30px; right: 30px; background-color: var(--text); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000; }
         #status-msg { text-align: center; font-size: 0.9rem; margin-top: 10px; color: #10b981; min-height: 20px; }
         #login-section { text-align: center; }
         #app-section { display: none; }
@@ -145,40 +43,25 @@
 <body>
 
     <div class="container">
-        <!-- Authentication Section -->
         <div id="login-section" class="card">
             <h2>Welcome</h2>
             <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px;">Please sign in to log family expenses.</p>
             <div id="google-btn-container" style="display: flex; justify-content: center;"></div>
         </div>
 
-        <!-- Main App Section -->
         <div id="app-section">
             <div class="user-badge" id="user-display"></div>
 
-            <!-- Dashboard Card -->
             <div class="card">
                 <h2>Monthly Overview</h2>
-                <div class="progress-label">
-                    <span>Time Elapsed</span>
-                    <span id="time-percent">0%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill time" id="time-fill"></div>
-                </div>
-
-                <div class="progress-label">
-                    <span id="budget-label">Budget Spent</span>
-                    <span id="budget-percent">0%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="budget-fill"></div>
-                </div>
+                <div class="progress-label"><span>Time Elapsed</span><span id="time-percent">0%</span></div>
+                <div class="progress-bar"><div class="progress-fill time" id="time-fill"></div></div>
+                <div class="progress-label"><span id="budget-label">Budget Spent</span><span id="budget-percent">0%</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="budget-fill"></div></div>
             </div>
 
-            <!-- Entry Card -->
             <div class="card">
-                <h2>Log Expense</h2>
+                <h2 id="form-title">Log Expense</h2>
                 <form id="expense-form">
                     <label for="category">Category / Item</label>
                     <input type="text" id="category" list="category-suggestions" required autocomplete="off" placeholder="e.g., Groceries">
@@ -188,16 +71,14 @@
                     <input type="number" id="amount" required placeholder="0.00" step="0.01">
 
                     <button type="submit" id="submit-btn" class="primary-btn">Save Expense</button>
+                    <button type="button" id="cancel-edit-btn" class="cancel-btn" onclick="cancelEdit()">Cancel Edit</button>
                     <div id="status-msg"></div>
                 </form>
             </div>
             
-            <!-- Recent Transactions Card -->
             <div class="card">
                 <h2>Recent Transactions</h2>
-                <div id="expense-list">
-                    <p style="font-size: 0.9rem; color: var(--muted); text-align: center;">Loading transactions...</p>
-                </div>
+                <div id="expense-list"><p style="font-size: 0.9rem; color: var(--muted); text-align: center;">Loading...</p></div>
             </div>
         </div>
     </div>
@@ -205,22 +86,17 @@
     <div class="fab-menu" id="logout-menu">☰</div>
 
     <script>
-        // --- 1. CONFIGURATION ---
         const API_URL = 'https://script.google.com/macros/s/AKfycbzhnD3U5AB_I_MWx5uS5xEBMpxPTkbX9lgyZP66IO0Y96gshrDlJGLXjtl-ZWbXNA_Nyw/exec'; 
         const GOOGLE_CLIENT_ID = '670123200048-hqhborskt23c1bunn6flobse3cn0k83p.apps.googleusercontent.com';
-        
         let currentUserEmail = '';
+        let editingTransactionId = null; // Tracks if form is in Edit Mode
 
-        // --- 2. AUTHENTICATION LOGIC ---
+        // --- AUTH ---
         function decodeJwtResponse(token) {
             let base64Url = token.split('.')[1];
             let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
+            return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
         }
-
         function handleCredentialResponse(response) {
             const payload = decodeJwtResponse(response.credential);
             currentUserEmail = payload.email;
@@ -228,229 +104,168 @@
             localStorage.setItem('active_user_name', payload.given_name);
             showAppInterface();
         }
-
         function showAppInterface() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('app-section').style.display = 'block';
             document.getElementById('user-display').innerText = `Logged in as: ${localStorage.getItem('active_user_name')} (${currentUserEmail})`;
-            
-            // Run initial calculations and load data
-            calculateTimeElapsed();
-            loadCategories();
-            loadDashboardData(); 
-            loadExpenses();
+            calculateTimeElapsed(); loadCategories(); loadDashboardData(); loadExpenses();
         }
-
         function initGoogleAuth() {
             const savedEmail = localStorage.getItem('active_user_email');
-            if (savedEmail) {
-                currentUserEmail = savedEmail;
-                showAppInterface();
-            } else {
-                google.accounts.id.initialize({
-                    client_id: GOOGLE_CLIENT_ID,
-                    callback: handleCredentialResponse
-                });
-                google.accounts.id.renderButton(
-                    document.getElementById("google-btn-container"),
-                    { theme: "outline", size: "large", width: 250 }
-                );
+            if (savedEmail) { currentUserEmail = savedEmail; showAppInterface(); } 
+            else {
+                google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
+                google.accounts.id.renderButton(document.getElementById("google-btn-container"), { theme: "outline", size: "large", width: 250 });
             }
         }
-
         document.getElementById('logout-menu').addEventListener('click', () => {
-            if(confirm("Log out of the app?")) {
-                localStorage.removeItem('active_user_email');
-                localStorage.removeItem('active_user_name');
-                location.reload();
-            }
+            if(confirm("Log out of the app?")) { localStorage.clear(); location.reload(); }
         });
 
-        // --- 3. DASHBOARD METRICS ---
+        // --- UI UPDATES ---
         function calculateTimeElapsed() {
             const today = new Date();
-            const dayOfMonth = today.getDate();
-            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-            const percentElapsed = Math.round((dayOfMonth / daysInMonth) * 100);
-            
+            const percentElapsed = Math.round((today.getDate() / new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()) * 100);
             document.getElementById('time-percent').innerText = `${percentElapsed}%`;
             document.getElementById('time-fill').style.width = `${percentElapsed}%`;
         }
 
         async function loadDashboardData() {
             try {
-                const response = await fetch(`${API_URL}?action=getDashboardData`);
-                const result = await response.json();
-                
+                const res = await fetch(`${API_URL}?action=getDashboardData`);
+                const result = await res.json();
                 if (result.status === 'success') {
-                    const totalSpent = result.totalSpent;
-                    const threshold = result.budgetThreshold;
-                    const percentSpent = threshold > 0 ? Math.round((totalSpent / threshold) * 100) : 0;
-                    
-                    document.getElementById('budget-label').innerText = `Budget Spent (₹${totalSpent} / ₹${threshold})`;
+                    const percentSpent = result.budgetThreshold > 0 ? Math.round((result.totalSpent / result.budgetThreshold) * 100) : 0;
+                    document.getElementById('budget-label').innerText = `Budget Spent (₹${result.totalSpent} / ₹${result.budgetThreshold})`;
                     document.getElementById('budget-percent').innerText = `${percentSpent}%`;
-                    
                     const fillBar = document.getElementById('budget-fill');
                     fillBar.style.width = `${Math.min(percentSpent, 100)}%`;
-                    
-                    if (percentSpent >= 100) {
-                        fillBar.style.backgroundColor = '#ef4444'; 
-                    } else if (percentSpent >= 80) {
-                        fillBar.style.backgroundColor = '#f59e0b'; 
-                    } else {
-                        fillBar.style.backgroundColor = 'var(--primary)'; 
-                    }
+                    fillBar.style.backgroundColor = percentSpent >= 100 ? '#ef4444' : (percentSpent >= 80 ? '#f59e0b' : 'var(--primary)');
                 }
-            } catch (error) { console.error("Error loading dashboard numbers:", error); }
+            } catch (error) {}
         }
 
-        // --- 4. EXPENSE LIST & DELETE LOGIC ---
         async function loadExpenses() {
             try {
-                const response = await fetch(`${API_URL}?action=getExpenses`);
-                const result = await response.json();
-                const listContainer = document.getElementById('expense-list');
+                const res = await fetch(`${API_URL}?action=getExpenses`);
+                const result = await res.json();
+                const list = document.getElementById('expense-list');
                 
                 if (result.status === 'success') {
-                    listContainer.innerHTML = ''; // Clear loading text
-                    
-                    if (result.data.length === 0) {
-                        listContainer.innerHTML = '<p style="font-size: 0.9rem; color: var(--muted); text-align: center;">No expenses logged this month yet.</p>';
-                        return;
-                    }
+                    list.innerHTML = ''; 
+                    if (result.data.length === 0) { list.innerHTML = '<p style="font-size: 0.9rem; text-align: center;">No expenses logged yet.</p>'; return; }
                     
                     result.data.forEach(exp => {
-                        // Extract just the time or a clean date string for the UI
                         const dateObj = new Date(exp.timestamp);
                         const cleanDate = `${dateObj.getDate()}/${dateObj.getMonth()+1} • ${dateObj.getHours()}:${dateObj.getMinutes() < 10 ? '0' : ''}${dateObj.getMinutes()}`;
-                        
-                        // Extract just the name from the email (e.g., "hitesh" from hitesh@gmail.com)
-                        const userName = exp.userEmail.split('@')[0];
                         
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'expense-item';
                         
-                        // Build inner HTML
                         let html = `
                             <div class="expense-details">
                                 <div class="expense-title">${exp.category} <span class="expense-amount">₹${exp.amount}</span></div>
-                                <div class="expense-meta">${cleanDate} • Logged by: ${userName}</div>
+                                <div class="expense-meta">${cleanDate} • By: ${exp.userEmail.split('@')[0]}</div>
                             </div>
                         `;
                         
-                        // Add delete button ONLY if the logged in user owns it
+                        // Add Edit and Delete buttons if owned
                         if (exp.userEmail === currentUserEmail) {
-                            html += `<button class="delete-btn" onclick="deleteExpense('${exp.id}', this)">Delete</button>`;
+                            const safeCategory = exp.category.replace(/'/g, "\\'"); // escape quotes for inline handler
+                            html += `<div>
+                                        <button class="edit-btn" onclick="startEdit('${exp.id}', '${safeCategory}', ${exp.amount})">Edit</button>
+                                        <button class="delete-btn" onclick="deleteExpense('${exp.id}', this)">Delete</button>
+                                     </div>`;
                         }
-                        
                         itemDiv.innerHTML = html;
-                        listContainer.appendChild(itemDiv);
+                        list.appendChild(itemDiv);
                     });
                 }
-            } catch (error) {
-                document.getElementById('expense-list').innerHTML = '<p style="color: red; text-align: center;">Failed to load transactions.</p>';
-            }
+            } catch (error) { document.getElementById('expense-list').innerHTML = '<p style="color: red; text-align: center;">Failed to load.</p>'; }
         }
-        
-        // Expose function globally for the onclick handler
-        window.deleteExpense = async function(transactionId, btnElement) {
+
+        // --- EDIT STATE HANDLERS ---
+        window.startEdit = function(id, category, amount) {
+            editingTransactionId = id;
+            document.getElementById('category').value = category;
+            document.getElementById('amount').value = amount;
+            
+            document.getElementById('form-title').innerText = 'Edit Expense';
+            document.getElementById('submit-btn').innerText = 'Update Expense';
+            document.getElementById('cancel-edit-btn').style.display = 'block';
+            
+            // Smooth scroll to form
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.cancelEdit = function() {
+            editingTransactionId = null;
+            document.getElementById('expense-form').reset();
+            document.getElementById('form-title').innerText = 'Log Expense';
+            document.getElementById('submit-btn').innerText = 'Save Expense';
+            document.getElementById('cancel-edit-btn').style.display = 'none';
+        }
+
+        window.deleteExpense = async function(id, btn) {
             if (!confirm("Are you sure you want to delete this expense?")) return;
-            
-            btnElement.innerText = "Deleting...";
-            btnElement.disabled = true;
-            
+            btn.innerText = "Deleting..."; btn.disabled = true;
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'deleteExpense',
-                        transactionId: transactionId,
-                        userEmail: currentUserEmail
-                    })
-                });
-                
-                const result = await response.json();
-                if (result.status === 'success') {
-                    // Refresh data
-                    loadDashboardData();
-                    loadExpenses();
-                } else {
-                    alert("Error: " + result.message);
-                    btnElement.innerText = "Delete";
-                    btnElement.disabled = false;
-                }
-            } catch (error) {
-                alert("Network error while deleting.");
-                btnElement.innerText = "Delete";
-                btnElement.disabled = false;
-            }
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteExpense', transactionId: id, userEmail: currentUserEmail }) });
+                if ((await res.json()).status === 'success') { loadDashboardData(); loadExpenses(); } 
+                else { alert("Error deleting"); btn.innerText = "Delete"; btn.disabled = false; }
+            } catch (e) { alert("Network error"); btn.innerText = "Delete"; btn.disabled = false; }
         };
 
-        // --- 5. CATEGORIES & SUBMISSION ---
-        function populateDatalist(categories) {
-            const dataList = document.getElementById('category-suggestions');
-            dataList.innerHTML = ''; 
-            categories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                dataList.appendChild(option);
-            });
-        }
-
-        async function loadCategories() {
+        // --- FORM SUBMIT (Handles both Add and Update) ---
+        async function loadCategories() { /* ... unchanged logic from previous ... */
             const cachedCats = localStorage.getItem('expense_categories');
             if (cachedCats) populateDatalist(JSON.parse(cachedCats));
             try {
-                const response = await fetch(`${API_URL}?action=getCategories`);
-                const result = await response.json();
-                if (result.status === 'success') {
-                    localStorage.setItem('expense_categories', JSON.stringify(result.data));
-                    populateDatalist(result.data);
-                }
-            } catch (error) { console.error("Failed to fetch categories"); }
+                const res = await fetch(`${API_URL}?action=getCategories`);
+                const result = await res.json();
+                if (result.status === 'success') { localStorage.setItem('expense_categories', JSON.stringify(result.data)); populateDatalist(result.data); }
+            } catch (e) {}
+        }
+        function populateDatalist(categories) {
+            const dataList = document.getElementById('category-suggestions'); dataList.innerHTML = ''; 
+            categories.forEach(cat => { const opt = document.createElement('option'); opt.value = cat; dataList.appendChild(opt); });
         }
 
         document.getElementById('expense-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const btn = document.getElementById('submit-btn');
             const statusMsg = document.getElementById('status-msg');
-            const category = document.getElementById('category').value;
-            const amount = document.getElementById('amount').value;
             
             btn.disabled = true;
-            btn.innerText = 'Saving...';
+            btn.innerText = editingTransactionId ? 'Updating...' : 'Saving...';
             statusMsg.innerText = '';
 
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        action: 'addExpense',
-                        category: category,
-                        amount: amount,
-                        userEmail: currentUserEmail
-                    })
-                });
+            const payload = {
+                action: editingTransactionId ? 'editExpense' : 'addExpense',
+                category: document.getElementById('category').value,
+                amount: document.getElementById('amount').value,
+                userEmail: currentUserEmail
+            };
+            if (editingTransactionId) payload.transactionId = editingTransactionId;
 
-                const result = await response.json();
+            try {
+                const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const result = await res.json();
                 
                 if (result.status === 'success') {
-                    statusMsg.innerText = 'Expense saved successfully!';
-                    document.getElementById('expense-form').reset();
-                    
-                    // Instantly refresh all 3 components!
+                    statusMsg.innerText = editingTransactionId ? 'Expense updated!' : 'Expense saved!';
+                    cancelEdit(); // Resets the form and state back to Add mode
                     await Promise.all([loadCategories(), loadDashboardData(), loadExpenses()]);
                 } else {
-                    statusMsg.innerText = 'Error saving expense.';
+                    statusMsg.innerText = 'Error: ' + result.message;
                     statusMsg.style.color = 'red';
                 }
             } catch (error) {
-                statusMsg.innerText = 'Network error. Try again.';
+                statusMsg.innerText = 'Network error.';
                 statusMsg.style.color = 'red';
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Save Expense';
+                if (!editingTransactionId) btn.innerText = 'Save Expense';
                 setTimeout(() => statusMsg.innerText = '', 3000);
             }
         });
