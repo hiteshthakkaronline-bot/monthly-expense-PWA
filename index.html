@@ -229,9 +229,7 @@
             document.getElementById('user-avatar').innerText = userName.charAt(0);
             
             calculateTimeElapsed(); 
-            loadCategories(); 
-            loadDashboardData(); 
-            loadExpenses();
+            loadInitialData();
         }
         function initGoogleAuth() {
             const savedEmail = localStorage.getItem('active_user_email');
