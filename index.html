@@ -153,6 +153,7 @@
             <div class="card">
                 <h2>Recent Transactions</h2>
                 <div id="expense-list"><p style="font-size: 0.9rem; color: var(--muted); text-align: center;">Loading...</p></div>
+                <button type="button" id="load-more-btn" class="cancel-btn" style="margin-top: 15px; display: none;" onclick="loadMoreExpenses()">Load More Transactions ↓</button>
             </div>
         </div>
     </div>
@@ -263,12 +264,13 @@
             fillBar.style.backgroundColor = percentSpent >= 100 ? 'var(--danger)' : (percentSpent >= 80 ? '#f59e0b' : 'var(--primary)');
         }
 
-        function renderExpenses(expenses) {
+        function renderExpenses(expenses, hasMore = false) {
             const list = document.getElementById('expense-list');
             list.innerHTML = '';
             
             if (expenses.length === 0) { 
                 list.innerHTML = '<p style="font-size: 0.9rem; text-align: center; color: var(--muted);">No expenses logged yet.</p>'; 
+                document.getElementById('load-more-btn').style.display = 'none';
                 return;
             }
             
@@ -303,46 +305,87 @@
                 itemDiv.innerHTML = html;
                 list.appendChild(itemDiv);
             });
+
+            // Handle Load More Button Visibility
+            const moreBtn = document.getElementById('load-more-btn');
+            moreBtn.style.display = hasMore ? 'block' : 'none';
         }
 
-        // --- PHASE 2: The Instant UI Master Fetch ---
+        // --- PHASE 3: Smart Batch Fetch & Cache ---
         async function loadInitialData() {
             // STEP 1: INSTANT LOAD FROM CACHE
-            // Paint the screen immediately with whatever data we saved on the phone last time
             const cachedCats = localStorage.getItem('expense_categories');
             if (cachedCats) populateDatalist(JSON.parse(cachedCats));
             
             const cachedDashboard = localStorage.getItem('dashboard_data');
             if (cachedDashboard) renderDashboard(JSON.parse(cachedDashboard));
             
-            const cachedExpenses = localStorage.getItem('expenses_data');
-            if (cachedExpenses) renderExpenses(JSON.parse(cachedExpenses));
+            let cachedExpenses = [];
+            const cachedExpStr = localStorage.getItem('expenses_data');
+            if (cachedExpStr) {
+                cachedExpenses = JSON.parse(cachedExpStr);
+                const cachedHasMore = localStorage.getItem('has_more_expenses') === 'true';
+                renderExpenses(cachedExpenses, cachedHasMore);
+            }
 
-            // STEP 2: SILENT BACKGROUND FETCH
-            // Now go ask Google if anything changed while the app was closed
+            // STEP 2: SILENT BACKGROUND FETCH (Syncs up to our current cached limit!)
+            const syncLimit = Math.max(cachedExpenses.length, 10);
             try {
-                const res = await fetch(`${API_URL}?action=getInitialData`);
+                const res = await fetch(`${API_URL}?action=getInitialData&limit=${syncLimit}`);
                 const result = await res.json();
                 
                 if (result.status === 'success') {
                     const data = result.data;
                     
-                    // Save the fresh data to the phone's local storage for next time
                     localStorage.setItem('expense_categories', JSON.stringify(data.categories));
                     localStorage.setItem('dashboard_data', JSON.stringify({ totalSpent: data.totalSpent, budgetThreshold: data.budgetThreshold }));
                     localStorage.setItem('expenses_data', JSON.stringify(data.expenses));
+                    localStorage.setItem('has_more_expenses', data.hasMore);
                     
-                    // Re-render the UI smoothly with the exact up-to-date numbers
                     populateDatalist(data.categories);
                     renderDashboard({ totalSpent: data.totalSpent, budgetThreshold: data.budgetThreshold });
-                    renderExpenses(data.expenses);
+                    renderExpenses(data.expenses, data.hasMore);
                 }
             } catch (error) { 
                 console.error(error);
-                // Only show a red error message if they have absolutely no cached data to look at
-                if (!cachedExpenses) {
-                    document.getElementById('expense-list').innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load data. Check network.</p>';
+                if (cachedExpenses.length === 0) {
+                    document.getElementById('expense-list').innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load data.</p>';
                 }
+            }
+        }
+
+        // --- NEW: Load More Transactions Button Handler ---
+        async function loadMoreExpenses() {
+            const moreBtn = document.getElementById('load-more-btn');
+            moreBtn.innerText = "Loading more...";
+            moreBtn.disabled = true;
+
+            const currentExpenses = JSON.parse(localStorage.getItem('expenses_data') || '[]');
+            const currentOffset = currentExpenses.length;
+
+            try {
+                const res = await fetch(`${API_URL}?action=getMoreExpenses&offset=${currentOffset}`);
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    // Append the next 10 items to our existing array
+                    const updatedExpenses = currentExpenses.concat(result.data.expenses);
+                    const hasMore = result.data.hasMore;
+
+                    // Update Cache
+                    localStorage.setItem('expenses_data', JSON.stringify(updatedExpenses));
+                    localStorage.setItem('has_more_expenses', hasMore);
+
+                    // Re-render
+                    renderExpenses(updatedExpenses, hasMore);
+                } else {
+                    alert("Failed to load more transactions.");
+                }
+            } catch (error) {
+                alert("Network error while fetching transactions.");
+            } finally {
+                moreBtn.innerText = "Load More Transactions ↓";
+                moreBtn.disabled = false;
             }
         }
      
