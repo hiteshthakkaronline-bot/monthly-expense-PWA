@@ -252,6 +252,76 @@
             document.getElementById('time-fill').style.width = `${percentElapsed}%`;
         }
 
+        // --- PHASE 1: The Master Fetch ---
+        async function loadInitialData() {
+            try {
+                // We use our local cached categories instantly while waiting for the network
+                const cachedCats = localStorage.getItem('expense_categories');
+                if (cachedCats) populateDatalist(JSON.parse(cachedCats));
+
+                const res = await fetch(`${API_URL}?action=getInitialData`);
+                const result = await res.json();
+                
+                if (result.status === 'success') {
+                    const data = result.data;
+                    
+                    // 1. Update Categories
+                    localStorage.setItem('expense_categories', JSON.stringify(data.categories));
+                    populateDatalist(data.categories);
+                    
+                    // 2. Update Dashboard
+                    const percentSpent = data.budgetThreshold > 0 ? Math.round((data.totalSpent / data.budgetThreshold) * 100) : 0;
+                    document.getElementById('budget-label').innerText = `Budget Spent (₹${data.totalSpent} / ₹${data.budgetThreshold})`;
+                    document.getElementById('budget-percent').innerText = `${percentSpent}%`;
+                    const fillBar = document.getElementById('budget-fill');
+                    fillBar.style.width = `${Math.min(percentSpent, 100)}%`;
+                    fillBar.style.backgroundColor = percentSpent >= 100 ? '#ef4444' : (percentSpent >= 80 ? '#f59e0b' : 'var(--primary)');
+                    
+                    // 3. Update Recent Transactions
+                    const list = document.getElementById('expense-list');
+                    list.innerHTML = '';
+                    
+                    if (data.expenses.length === 0) { 
+                        list.innerHTML = '<p style="font-size: 0.9rem; text-align: center;">No expenses logged yet.</p>'; 
+                        return;
+                    }
+                    
+                    data.expenses.forEach(exp => {
+                        const dateObj = new Date(exp.timestamp);
+                        const cleanDate = `${dateObj.getDate()}/${dateObj.getMonth()+1} • ${dateObj.getHours()}:${dateObj.getMinutes() < 10 ? '0' : ''}${dateObj.getMinutes()}`;
+                        
+                        let displayName = exp.userEmail.split('@')[0];
+                        if (exp.userEmail === currentUserEmail) {
+                            displayName = localStorage.getItem('active_user_name') || displayName;
+                        } else {
+                            displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+                        }
+
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'expense-item';
+                        let html = `
+                            <div class="expense-details">
+                                <div class="expense-title">${exp.category} <span class="expense-amount">₹${exp.amount}</span></div>
+                                <div class="expense-meta">${cleanDate} • By: ${displayName}</div>
+                            </div>
+                        `;
+                        if (exp.userEmail === currentUserEmail) {
+                            const safeCategory = exp.category.replace(/'/g, "\\'");
+                            html += `<div>
+                                        <button class="edit-btn" onclick="startEdit('${exp.id}', '${safeCategory}', ${exp.amount})">Edit</button>
+                                        <button class="delete-btn" onclick="deleteExpense('${exp.id}', this)">Delete</button>
+                                    </div>`;
+                        }
+                        itemDiv.innerHTML = html;
+                        list.appendChild(itemDiv);
+                    });
+                }
+            } catch (error) { 
+                console.error(error);
+                document.getElementById('expense-list').innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load data.</p>';
+            }
+        }
+     
         async function loadDashboardData() {
             try {
                 const res = await fetch(`${API_URL}?action=getDashboardData`);
