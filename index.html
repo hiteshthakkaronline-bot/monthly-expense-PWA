@@ -87,13 +87,20 @@
         color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; display: none;
         }
         
-        /* 4. Tighter Transaction List */
-        .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
-        .expense-item:last-child { border-bottom: none; }
-        .expense-details { flex-grow: 1; }
-        .expense-title { font-weight: 600; font-size: 0.95rem; color: var(--text); }
-        .expense-amount { font-weight: 600; color: var(--text); }
-        .expense-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+        /* 4. Sleek Transactions Table */
+        .transactions-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 5px; }
+        .transactions-table th { padding: 4px; border-bottom: 1px solid var(--border); color: var(--muted); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; text-align: left; }
+        .transactions-table th.text-right { text-align: right; }
+        .transactions-table th.text-center { text-align: center; }
+        
+        .transactions-table td { padding: 8px 4px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+        .transactions-table tr:last-child td { border-bottom: none; }
+        
+        .td-meta { font-size: 0.7rem; color: var(--muted); white-space: nowrap; line-height: 1.2; }
+        .td-name { font-size: 0.65rem; color: var(--primary); font-weight: 600; display: block; }
+        .td-category { font-weight: 500; word-break: break-word; line-height: 1.2; }
+        .td-amount { font-weight: 600; text-align: right; white-space: nowrap; }
+        .td-actions { text-align: right; white-space: nowrap; width: 60px; }
 
         /* Flex container for the form fields */
         .form-row { display: flex; gap: 10px; align-items: flex-end; }
@@ -101,8 +108,8 @@
         .form-group-small { flex: 0.6; } /* Keeps the amount field slightly narrower than the category */
         
         /* 5. Icon Action Buttons */
-        .action-btns { display: flex; gap: 8px; }
-        button.action-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .action-btns { display: inline-flex; gap: 6px; justify-content: flex-end; }
+        button.action-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
         button.action-btn.edit { color: var(--primary); border-color: var(--primary); }
         button.action-btn.delete { color: var(--danger); border-color: var(--danger); }
         button.action-btn:hover { opacity: 0.7; }
@@ -327,10 +334,25 @@
                 document.getElementById('load-more-btn').style.display = 'none';
                 return;
             }
+
+            // Initialize the table structure
+            let tableHTML = `
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th class="text-right">Amount</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             
             expenses.forEach(exp => {
                 const dateObj = new Date(exp.timestamp);
-                const cleanDate = `${dateObj.getDate()}/${dateObj.getMonth()+1} • ${dateObj.getHours()}:${dateObj.getMinutes() < 10 ? '0' : ''}${dateObj.getMinutes()}`;
+                // Dropped the bullet point to make the date string even more compact
+                const cleanDate = `${dateObj.getDate()}/${dateObj.getMonth()+1} ${dateObj.getHours()}:${dateObj.getMinutes() < 10 ? '0' : ''}${dateObj.getMinutes()}`;
                 
                 let displayName = exp.userEmail.split('@')[0];
                 if (exp.userEmail === currentUserEmail) {
@@ -339,35 +361,39 @@
                     displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
                 }
 
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'expense-item';
-                let html = `
-                    <div class="expense-details">
-                        <div class="expense-title">${exp.category} <span class="expense-amount">₹${exp.amount}</span></div>
-                        <div class="expense-meta">${cleanDate} • By: ${displayName}</div>
-                    </div>
-                `;
-                
+                let actionHTML = '';
                 if (exp.userEmail === currentUserEmail) {
                     const safeCategory = exp.category.replace(/'/g, "\\'");
-                    html += `<div class="action-btns">
-                                <button class="action-btn edit" onclick="startEdit('${exp.id}', '${safeCategory}', ${exp.amount})" title="Edit">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                </button>
-                                <button class="action-btn delete" onclick="deleteExpense('${exp.id}', this)" title="Delete">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                </button>
-                            </div>`;
+                    // Using slightly smaller 14x14 SVGs for the table view
+                    actionHTML = `
+                        <div class="action-btns">
+                            <button class="action-btn edit" onclick="startEdit('${exp.id}', '${safeCategory}', ${exp.amount})" title="Edit">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </button>
+                            <button class="action-btn delete" onclick="deleteExpense('${exp.id}', this)" title="Delete">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            </button>
+                        </div>
+                    `;
                 }
-                
-                itemDiv.innerHTML = html;
-                list.appendChild(itemDiv);
+
+                tableHTML += `
+                    <tr>
+                        <td class="td-meta">${cleanDate}<span class="td-name">${displayName}</span></td>
+                        <td class="td-category">${exp.category}</td>
+                        <td class="td-amount">₹${exp.amount}</td>
+                        <td class="td-actions">${actionHTML}</td>
+                    </tr>
+                `;
             });
 
+            tableHTML += `</tbody></table>`;
+            list.innerHTML = tableHTML;
+
+            // Handle Load More Button Visibility
             const moreBtn = document.getElementById('load-more-btn');
             moreBtn.style.display = hasMore ? 'block' : 'none';
         }
-
         // --- PHASE 3: Smart Batch Fetch & Cache ---
         async function loadInitialData() {
             const cachedCats = localStorage.getItem('expense_categories');
