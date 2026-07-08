@@ -28,7 +28,8 @@
 
         /* Dark Mode Variables */
         [data-theme="dark"] {
-            color-scheme: dark; /* Tells the browser to style native dropdowns/scrollbars dark */
+            color-scheme: dark;
+            /* Tells the browser to style native dropdowns/scrollbars dark */
             --primary: #3b82f6;
             --bg: #111827; 
             --card: #1f2937; 
@@ -38,9 +39,12 @@
             --border: #4b5563;
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; transition: background-color 0.3s ease, color 0.3s ease; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg);
+        color: var(--text); margin: 0; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; transition: background-color 0.3s ease, color 0.3s ease;
+        }
         
-        .container { width: 100%; max-width: 600px; margin: 0 auto; padding-bottom: 80px; box-sizing: border-box; }
+        .container { width: 100%;
+        max-width: 600px; margin: 0 auto; padding-bottom: 80px; box-sizing: border-box; }
         
         /* 1. Tighter Cards and Headers */
         .card { background-color: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); transition: background-color 0.3s ease; }
@@ -50,7 +54,8 @@
         .progress-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; margin-top: 10px; }
         .progress-label:first-of-type { margin-top: 0; }
         .progress-bar { width: 100%; height: 8px; background-color: var(--border); border-radius: 4px; overflow: hidden; }
-        .progress-fill { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.5s ease, background-color 0.3s ease; }
+        .progress-fill { height: 100%; background-color: var(--primary); width: 0%;
+        transition: width 0.5s ease, background-color 0.3s ease; }
         .progress-fill.time { background-color: #10b981; }
 
         /* 3. Compact Inputs */
@@ -61,7 +66,9 @@
         input:focus { outline: none; border-color: var(--primary); }
         
         button.primary-btn { width: 100%; padding: 12px; margin-top: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
-        button.cancel-btn { width: 100%; padding: 14px; background-color: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; display: none; }
+        button.cancel-btn { width: 100%; padding: 14px; background-color: transparent;
+        color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; display: none;
+        }
         button:disabled { opacity: 0.7; cursor: not-allowed; }
         
         /* 4. Tighter Transaction List */
@@ -77,27 +84,50 @@
         .form-group { flex: 1; }
         .form-group-small { flex: 0.6; } /* Keeps the amount field slightly narrower than the category */
         
-        button.edit-btn { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin-right: 5px; }
-        button.delete-btn { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
+        /* 5. Icon Action Buttons */
+        .action-btns { display: flex; gap: 8px; }
+        button.action-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        button.action-btn.edit { color: var(--primary); border-color: var(--primary); }
+        button.action-btn.delete { color: var(--danger); border-color: var(--danger); }
+        button.action-btn:hover { opacity: 0.7; }
         
-        .scroll-top-btn { position: fixed; bottom: 30px; right: 30px; background-color: var(--primary); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000; border: none; }
+        .scroll-top-btn { position: fixed;
+        bottom: 30px; right: 30px; background-color: var(--primary); color: white; width: 50px; height: 50px; border-radius: 50%; display: none; justify-content: center; align-items: center;
+        font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000; border: none;
+        }
         
-        #status-msg { text-align: center; font-size: 0.9rem; margin-top: 10px; color: #10b981; min-height: 20px; }
-        #login-section { text-align: center; }
-        #app-section { display: none; }
+        #status-msg { text-align: center;
+        font-size: 0.9rem; margin-top: 10px; color: #10b981; min-height: 20px; }
+        #login-section { text-align: center;
+        }
+        #app-section { display: none;
+        }
         
         /* --- Modern Top Navigation --- */
-        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-        .user-profile { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 38px; height: 38px; background-color: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; }
-        .greeting-text { display: flex; flex-direction: column; justify-content: center; }
-        .greeting-sub { font-size: 0.75rem; color: var(--muted); line-height: 1; margin-bottom: 3px; }
-        .greeting-name { font-size: 1.05rem; font-weight: 600; color: var(--text); line-height: 1; }
+        .top-nav { display: flex;
+        justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+        }
+        .user-profile { display: flex; align-items: center; gap: 10px;
+        }
+        .avatar { width: 38px; height: 38px; background-color: var(--primary); color: white; border-radius: 50%;
+        display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1.1rem; text-transform: uppercase;
+        }
+        .greeting-text { display: flex; flex-direction: column; justify-content: center;
+        }
+        .greeting-sub { font-size: 0.75rem; color: var(--muted); line-height: 1; margin-bottom: 3px;
+        }
+        .greeting-name { font-size: 1.05rem; font-weight: 600; color: var(--text); line-height: 1;
+        }
         
-        .nav-actions { display: flex; align-items: center; gap: 12px; }
-        .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 4px; color: var(--text); display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
-        .icon-btn:hover { opacity: 0.7; }
-        .logout-icon { color: var(--danger); }
+        .nav-actions { display: flex;
+        align-items: center; gap: 12px; }
+        .icon-btn { background: none; border: none; font-size: 1.3rem;
+        cursor: pointer; padding: 4px; color: var(--text); display: flex; align-items: center; justify-content: center; transition: opacity 0.2s;
+        }
+        .icon-btn:hover { opacity: 0.7;
+        }
+        .logout-icon { color: var(--danger);
+        }
     </style>
 </head>
 <body>
@@ -161,13 +191,14 @@
                     <button type="button" id="cancel-edit-btn" class="cancel-btn" onclick="cancelEdit()">Cancel Edit</button>
                     <div id="status-msg"></div>
                 </form>
-   
              </div>
             
             <div class="card">
                 <h2>Recent Transactions</h2>
-                <div id="expense-list"><p style="font-size: 0.9rem; color: var(--muted); text-align: center;">Loading...</p></div>
-                <button type="button" id="load-more-btn" class="cancel-btn" style="margin-top: 15px; display: none;" onclick="loadMoreExpenses()">Load More Transactions ↓</button>
+                <div id="expense-list"><p style="font-size: 0.9rem; color: var(--muted);
+                text-align: center;">Loading...</p></div>
+                <button type="button" id="load-more-btn" class="cancel-btn" style="margin-top: 15px;
+                display: none;" onclick="loadMoreExpenses()">Load More Transactions ↓</button>
             </div>
         </div>
     </div>
@@ -181,7 +212,6 @@
         let editingTransactionId = null; 
 
         // --- THEME ENGINE (Dark/Light Mode) ---
-   
         const themeToggleBtn = document.getElementById('theme-toggle');
         
         function applyTheme(theme) {
@@ -191,7 +221,6 @@
 
         function initTheme() {
             // 1. Check if user manually saved a preference before
-  
             const savedTheme = localStorage.getItem('app_theme');
             if (savedTheme) {
                 applyTheme(savedTheme);
@@ -208,9 +237,8 @@
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             localStorage.setItem('app_theme', newTheme);
             applyTheme(newTheme);
-   
          });
-
+         
         // Listen for OS-level theme changes in real-time (if user hasn't manually overridden)
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
             if (!localStorage.getItem('app_theme')) {
@@ -269,13 +297,14 @@
 
         // --- UI RENDER HELPERS ---
         function renderDashboard(data) {
-            const percentSpent = data.budgetThreshold > 0 ? Math.round((data.totalSpent / data.budgetThreshold) * 100) : 0;
+            const percentSpent = data.budgetThreshold > 0 ?
+            Math.round((data.totalSpent / data.budgetThreshold) * 100) : 0;
             document.getElementById('budget-label').innerText = `Budget Spent (₹${data.totalSpent} / ₹${data.budgetThreshold})`;
             document.getElementById('budget-percent').innerText = `${percentSpent}%`;
-            
             const fillBar = document.getElementById('budget-fill');
             fillBar.style.width = `${Math.min(percentSpent, 100)}%`;
-            fillBar.style.backgroundColor = percentSpent >= 100 ? 'var(--danger)' : (percentSpent >= 80 ? '#f59e0b' : 'var(--primary)');
+            fillBar.style.backgroundColor = percentSpent >= 100 ?
+            'var(--danger)' : (percentSpent >= 80 ? '#f59e0b' : 'var(--primary)');
         }
 
         function renderExpenses(expenses, hasMore = false) {
@@ -283,7 +312,7 @@
             list.innerHTML = '';
             
             if (expenses.length === 0) { 
-                list.innerHTML = '<p style="font-size: 0.9rem; text-align: center; color: var(--muted);">No expenses logged yet.</p>'; 
+                list.innerHTML = '<p style="font-size: 0.9rem; text-align: center; color: var(--muted);">No expenses logged yet.</p>';
                 document.getElementById('load-more-btn').style.display = 'none';
                 return;
             }
@@ -310,9 +339,13 @@
                 
                 if (exp.userEmail === currentUserEmail) {
                     const safeCategory = exp.category.replace(/'/g, "\\'");
-                    html += `<div>
-                                <button class="edit-btn" onclick="startEdit('${exp.id}', '${safeCategory}', ${exp.amount})">Edit</button>
-                                <button class="delete-btn" onclick="deleteExpense('${exp.id}', this)">Delete</button>
+                    html += `<div class="action-btns">
+                                <button class="action-btn edit" onclick="startEdit('${exp.id}', '${safeCategory}', ${exp.amount})" title="Edit">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteExpense('${exp.id}', this)" title="Delete">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
                             </div>`;
                 }
                 
@@ -350,7 +383,6 @@
                 
                 if (result.status === 'success') {
                     const data = result.data;
-                    
                     localStorage.setItem('expense_categories', JSON.stringify(data.categories));
                     localStorage.setItem('dashboard_data', JSON.stringify({ totalSpent: data.totalSpent, budgetThreshold: data.budgetThreshold }));
                     localStorage.setItem('expenses_data', JSON.stringify(data.expenses));
@@ -376,7 +408,6 @@
 
             const currentExpenses = JSON.parse(localStorage.getItem('expenses_data') || '[]');
             const currentOffset = currentExpenses.length;
-
             try {
                 const res = await fetch(`${API_URL}?action=getMoreExpenses&offset=${currentOffset}`);
                 const result = await res.json();
@@ -430,16 +461,15 @@
                 const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteExpense', transactionId: id, userEmail: currentUserEmail }) });
                 if ((await res.json()).status === 'success') { 
                     // Phase 1: Refresh using the master function
-                    await loadInitialData();                                             
+                    await loadInitialData();
                 } else {
                     alert("Error deleting");
                     btn.innerText = "Delete";
                     btn.disabled = false; 
                 }
             } catch (e) { alert("Network error");
-                btn.innerText = "Delete"; btn.disabled = false; }
+            btn.innerText = "Delete"; btn.disabled = false; }
         };
-        
         // --- FORM SUBMIT & CATEGORIES ---
         function populateDatalist(categories) {
             const dataList = document.getElementById('category-suggestions');
@@ -461,6 +491,7 @@
                 action: editingTransactionId ? 'editExpense' : 'addExpense',
                 category: document.getElementById('category').value,
                 amount: document.getElementById('amount').value,
+                
                 userEmail: currentUserEmail
  
              };
@@ -469,10 +500,9 @@
             try {
                 const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const result = await res.json();
-              
                 if (result.status === 'success') {
                     statusMsg.innerText = editingTransactionId ?
-                        'Expense updated!' : 'Expense saved!';
+                    'Expense updated!' : 'Expense saved!';
                     cancelEdit(); 
                     // Phase 1: Call the master function to refresh the screen instantly
                     await loadInitialData();
@@ -503,7 +533,6 @@
         scrollBtn.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-        
         window.onload = initGoogleAuth;
     </script>
 </body>
