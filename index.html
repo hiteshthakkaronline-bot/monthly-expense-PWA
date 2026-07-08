@@ -42,30 +42,40 @@
         
         .container { width: 100%; max-width: 600px; margin: 0 auto; padding-bottom: 80px; box-sizing: border-box; }
         
-        .card { background-color: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); transition: background-color 0.3s ease; }
-        h2 { margin-top: 0; font-size: 1.2rem; }
+        /* 1. Tighter Cards and Headers */
+        .card { background-color: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); transition: background-color 0.3s ease; }
+        h2 { margin-top: 0; margin-bottom: 10px; font-size: 1.1rem; }
         
-        .progress-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; margin-top: 15px; }
-        .progress-bar { width: 100%; height: 10px; background-color: var(--border); border-radius: 5px; overflow: hidden; }
+        /* 2. Slimmer Progress Bars */
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; margin-top: 10px; }
+        .progress-label:first-of-type { margin-top: 0; }
+        .progress-bar { width: 100%; height: 8px; background-color: var(--border); border-radius: 4px; overflow: hidden; }
         .progress-fill { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.5s ease, background-color 0.3s ease; }
         .progress-fill.time { background-color: #10b981; }
 
-        label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--muted); font-size: 0.9rem; }
+        /* 3. Compact Inputs */
+        label { display: block; margin-bottom: 3px; font-weight: 500; color: var(--muted); font-size: 0.8rem; }
         
         /* Updated Input to use variables for Dark Mode */
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; box-sizing: border-box; background-color: var(--input-bg); color: var(--text); }
+        input { width: 100%; padding: 10px; margin-bottom: 0; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; background-color: var(--input-bg); color: var(--text); }
         input:focus { outline: none; border-color: var(--primary); }
         
-        button.primary-btn { width: 100%; padding: 14px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
+        button.primary-btn { width: 100%; padding: 12px; margin-top: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
         button.cancel-btn { width: 100%; padding: 14px; background-color: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; display: none; }
         button:disabled { opacity: 0.7; cursor: not-allowed; }
         
-        .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        /* 4. Tighter Transaction List */
+        .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
         .expense-item:last-child { border-bottom: none; }
         .expense-details { flex-grow: 1; }
-        .expense-title { font-weight: 600; font-size: 1rem; color: var(--text); }
+        .expense-title { font-weight: 600; font-size: 0.95rem; color: var(--text); }
         .expense-amount { font-weight: 600; color: var(--text); }
-        .expense-meta { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+        .expense-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+        /* NEW: Flex container for the form fields */
+        .form-row { display: flex; gap: 10px; align-items: flex-end; }
+        .form-group { flex: 1; }
+        .form-group-small { flex: 0.6; } /* Keeps the amount field slightly narrower than the category */
         
         button.edit-btn { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; margin-right: 5px; }
         button.delete-btn { background-color: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
@@ -134,14 +144,18 @@
             <div class="card">
                 <h2 id="form-title">Log Expense</h2>
                 <form id="expense-form">
-       
-                     <label for="category">Category / Item</label>
-                    <input type="text" id="category" list="category-suggestions" required autocomplete="off" placeholder="e.g., Groceries">
-                    <datalist id="category-suggestions"></datalist>
-
-                    <label for="amount">Amount (₹)</label>
-              
-                    <input type="number" id="amount" required placeholder="0.00" step="0.01">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category">Category / Item</label>
+                            <input type="text" id="category" list="category-suggestions" required autocomplete="off" placeholder="e.g., Groceries">
+                            <datalist id="category-suggestions"></datalist>
+                        </div>
+                        
+                        <div class="form-group-small">
+                            <label for="amount">Amount (₹)</label>
+                            <input type="number" id="amount" required placeholder="0.00" step="0.01">
+                        </div>
+                    </div>
 
                     <button type="submit" id="submit-btn" class="primary-btn">Save Expense</button>
                     <button type="button" id="cancel-edit-btn" class="cancel-btn" onclick="cancelEdit()">Cancel Edit</button>
