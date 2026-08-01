@@ -458,6 +458,8 @@
             }
 
             const syncLimit = Math.max(cachedExpenses.length, 10);
+            // STEP 2: SILENT BACKGROUND FETCH 
+            const syncLimit = Math.max(cachedExpenses.length, 10);
             try {
                 const res = await fetch(`${API_URL}?action=getInitialData&limit=${syncLimit}`);
                 const result = await res.json();
@@ -470,13 +472,18 @@
                     localStorage.setItem('has_more_expenses', data.hasMore);
                     
                     populateDatalist(data.categories);
-                    renderDashboard({ totalSpent: data.totalSpent, budgetThreshold: data.budgetThreshold });
+                    renderDashboard(data);
                     renderExpenses(data.expenses, data.hasMore);
+                } else {
+                    // NEW: Surface Google Apps Script backend errors cleanly in the UI
+                    document.getElementById('expense-list').innerHTML = `<p style="color: var(--danger); text-align: center; padding: 20px;"><b>Backend Error:</b><br>${result.message}</p>`;
+                    document.getElementById('load-more-btn').style.display = 'none';
                 }
             } catch (error) { 
                 console.error(error);
                 if (cachedExpenses.length === 0) {
-                    document.getElementById('expense-list').innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load data.</p>';
+                    // NEW: Catch actual network dropouts
+                    document.getElementById('expense-list').innerHTML = `<p style="color: var(--danger); text-align: center; padding: 20px;"><b>Network Error:</b><br>Could not reach server.</p>`;
                 }
             }
         }
