@@ -53,10 +53,11 @@
         /* 2. Slimmer Progress Bars */
         .progress-label { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; margin-top: 10px; }
         .progress-label:first-of-type { margin-top: 0; }
-        .progress-bar { width: 100%; height: 8px; background-color: var(--border); border-radius: 4px; overflow: hidden; }
-        .progress-fill { height: 100%; background-color: var(--primary); width: 0%;
-        transition: width 0.5s ease, background-color 0.3s ease; }
+        .progress-bar { display: flex; width: 100%; height: 8px; background-color: var(--border); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; transition: width 0.5s ease, background-color 0.3s ease; }
         .progress-fill.time { background-color: #10b981; }
+        .progress-fill.current-spent { background-color: var(--primary); }
+        .progress-fill.carry-forward { background-color: #8b5cf6; cursor: help; } /* Purple color for carryover */
 
         /* 3. Compact Inputs */
         label { display: block; margin-bottom: 3px; font-weight: 500; color: var(--muted); font-size: 0.8rem; }
@@ -183,7 +184,12 @@
                 <div class="progress-bar"><div class="progress-fill time" id="time-fill"></div></div>
       
                 <div class="progress-label"><span id="budget-label">Budget Spent</span><span id="budget-percent">0%</span></div>
-                <div class="progress-bar"><div class="progress-fill" id="budget-fill"></div></div>
+                
+                <!-- NEW: Stacked Progress Bar -->
+                <div class="progress-bar">
+                    <div class="progress-fill carry-forward" id="carry-forward-fill" style="width: 0%; display: none;"></div>
+                    <div class="progress-fill current-spent" id="budget-fill" style="width: 0%;"></div>
+                </div>
             </div>
 
             <div class="card">
@@ -315,14 +321,55 @@
 
         // --- UI RENDER HELPERS ---
         function renderDashboard(data) {
-            const percentSpent = data.budgetThreshold > 0 ?
-            Math.round((data.totalSpent / data.budgetThreshold) * 100) : 0;
-            document.getElementById('budget-label').innerText = `Budget Spent (₹${data.totalSpent} / ₹${data.budgetThreshold})`;
-            document.getElementById('budget-percent').innerText = `${percentSpent}%`;
-            const fillBar = document.getElementById('budget-fill');
-            fillBar.style.width = `${Math.min(percentSpent, 100)}%`;
-            fillBar.style.backgroundColor = percentSpent >= 100 ?
-            'var(--danger)' : (percentSpent >= 80 ? '#f59e0b' : 'var(--primary)');
+            const carryForward = data.carryForward || 0;
+            const currentSpent = data.totalSpent || 0;
+            const budget = data.budgetThreshold > 0 ? data.budgetThreshold : 1;
+            
+            // Total effective spent is the current month's expenses PLUS the penalty from last month
+            const totalEffectiveSpent = currentSpent + carryForward;
+            const totalPercent = Math.round((totalEffectiveSpent / budget) * 100);
+            
+            document.getElementById('budget-label').innerText = `Budget Spent (₹${totalEffectiveSpent} / ₹${budget})`;
+            document.getElementById('budget-percent').innerText = `${totalPercent}%`;
+            
+            let carryForwardPercent = (carryForward / budget) * 100;
+            let currentSpentPercent = (currentSpent / budget) * 100;
+            
+            // Visual constraint: Ensure the bars don't exceed 100% width on screen
+            if (carryForwardPercent + currentSpentPercent > 100) {
+                if (carryForwardPercent >= 100) {
+                    carryForwardPercent = 100;
+                    currentSpentPercent = 0;
+                } else {
+                    currentSpentPercent = 100 - carryForwardPercent;
+                }
+            }
+
+            const carryFill = document.getElementById('carry-forward-fill');
+            const mainFill = document.getElementById('budget-fill');
+
+            // Render Carry Forward Block
+            if (carryForward > 0) {
+                carryFill.style.display = 'block';
+                carryFill.style.width = `${carryForwardPercent}%`;
+                // The native HTML title attribute creates a perfect tap/hover tooltip!
+                carryFill.title = `Carry Forward Overspend: ₹${carryForward}`; 
+            } else {
+                carryFill.style.display = 'none';
+                carryFill.style.width = '0%';
+            }
+
+            // Render Current Spent Block
+            mainFill.style.width = `${currentSpentPercent}%`;
+            
+            // Color logic for main fill based on the TOTAL percent
+            if (totalPercent >= 100) {
+                mainFill.style.backgroundColor = 'var(--danger)';
+            } else if (totalPercent >= 80) {
+                mainFill.style.backgroundColor = '#f59e0b'; // Warning Orange
+            } else {
+                mainFill.style.backgroundColor = 'var(--primary)'; // Normal Blue
+            }
         }
 
         function renderExpenses(expenses, hasMore = false) {
@@ -418,7 +465,7 @@
                 if (result.status === 'success') {
                     const data = result.data;
                     localStorage.setItem('expense_categories', JSON.stringify(data.categories));
-                    localStorage.setItem('dashboard_data', JSON.stringify({ totalSpent: data.totalSpent, budgetThreshold: data.budgetThreshold }));
+                    localStorage.setItem('dashboard_data', JSON.stringify({ totalSpent: data.totalSpent, budgetThreshold: data.budgetThreshold, carryForward: data.carryForward }));
                     localStorage.setItem('expenses_data', JSON.stringify(data.expenses));
                     localStorage.setItem('has_more_expenses', data.hasMore);
                     
