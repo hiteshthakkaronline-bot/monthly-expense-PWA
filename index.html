@@ -398,8 +398,13 @@
                 carryFill.style.display = 'block';
                 carryFill.style.width = `${carryForwardPercent}%`;
                 
-                // Smart crisp text display
-                tooltip.innerHTML = `↩️ <b>₹${carryForward}</b> carried over from previous month`; 
+                // Get previous month's full name (e.g., "July")
+                const prevDate = new Date();
+                prevDate.setMonth(prevDate.getMonth() - 1);
+                const prevMonthName = prevDate.toLocaleString('default', { month: 'long' });
+
+                // Smart crisp text display with actual month name
+                tooltip.innerHTML = `↩️ <b>₹${carryForward}</b> carried over from ${prevMonthName}`; 
 
                 // Hover events for desktop
                 carryFill.onmouseenter = () => tooltip.classList.add('show');
