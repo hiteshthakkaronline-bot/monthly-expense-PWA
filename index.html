@@ -60,6 +60,45 @@
         .progress-fill.current-spent { background-color: var(--primary); }
         .progress-fill.carry-forward { background-color: #8b5cf6; cursor: help; } /* Purple color for carryover */
 
+        /* Custom Carry-Forward Tooltip Popup */
+        .progress-bar-wrapper { position: relative; margin-top: 4px; }
+        
+        .carry-tooltip {
+            position: absolute;
+            bottom: 16px;
+            left: 0;
+            background-color: #1e1b4b; /* Deep purple background */
+            color: #ddd6fe;
+            border: 1px solid #8b5cf6;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 20;
+        }
+        
+        /* Subtle arrow pointing down to the purple bar */
+        .carry-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 12px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #8b5cf6 transparent transparent transparent;
+        }
+
+        .carry-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
         /* 3. Compact Inputs */
         label { display: block; margin-bottom: 3px; font-weight: 500; color: var(--muted); font-size: 0.8rem; }
         
@@ -187,9 +226,13 @@
                 <div class="progress-label"><span id="budget-label">Budget Spent</span><span id="budget-percent">0%</span></div>
                 
                 <!-- NEW: Stacked Progress Bar -->
-                <div class="progress-bar">
-                    <div class="progress-fill carry-forward" id="carry-forward-fill" style="width: 0%; display: none;"></div>
-                    <div class="progress-fill current-spent" id="budget-fill" style="width: 0%;"></div>
+                <!-- NEW: Wrapper with custom floating tooltip -->
+                <div class="progress-bar-wrapper">
+                    <div id="carry-tooltip" class="carry-tooltip"></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill carry-forward" id="carry-forward-fill" style="width: 0%; display: none;"></div>
+                        <div class="progress-fill current-spent" id="budget-fill" style="width: 0%;"></div>
+                    </div>
                 </div>
             </div>
 
@@ -350,14 +393,27 @@
             const mainFill = document.getElementById('budget-fill');
 
             // Render Carry Forward Block
+            const tooltip = document.getElementById('carry-tooltip');
             if (carryForward > 0) {
                 carryFill.style.display = 'block';
                 carryFill.style.width = `${carryForwardPercent}%`;
-                // The native HTML title attribute creates a perfect tap/hover tooltip!
-                carryFill.title = `Carry Forward Overspend: ₹${carryForward}`; 
+                
+                // Smart crisp text display
+                tooltip.innerHTML = `↩️ <b>₹${carryForward}</b> carried over from previous month`; 
+
+                // Hover events for desktop
+                carryFill.onmouseenter = () => tooltip.classList.add('show');
+                carryFill.onmouseleave = () => tooltip.classList.remove('show');
+                
+                // Tap event for mobile touchscreens
+                carryFill.onclick = (e) => {
+                    e.stopPropagation();
+                    tooltip.classList.toggle('show');
+                };
             } else {
                 carryFill.style.display = 'none';
                 carryFill.style.width = '0%';
+                tooltip.classList.remove('show');
             }
 
             // Render Current Spent Block
@@ -627,6 +683,13 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
         window.onload = initGoogleAuth;
+
+        // Auto-dismiss tooltip when tapping outside
+        document.addEventListener('click', () => {
+            const tooltip = document.getElementById('carry-tooltip');
+            if (tooltip) tooltip.classList.remove('show');
+        });
+        
     </script>
 </body>
 </html>
