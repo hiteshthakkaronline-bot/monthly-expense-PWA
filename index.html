@@ -708,6 +708,41 @@
             const tooltip = document.getElementById('carry-tooltip');
             if (tooltip) tooltip.classList.remove('show');
         });
+
+        // --- PRIVACY FILTER ENGINE ---
+        function togglePrivacyMode() {
+            const isPrivate = document.body.getAttribute('data-privacy') === 'true';
+            const newState = !isPrivate;
+            document.body.setAttribute('data-privacy', newState ? 'true' : 'false');
+            localStorage.setItem('privacy_mode', newState ? 'true' : 'false');
+        }
+
+        // Restore privacy state on app load
+        if (localStorage.getItem('privacy_mode') === 'true') {
+            document.body.setAttribute('data-privacy', 'true');
+        }
+
+        // Mobile Double-Tap Detector on vacant spaces
+        let lastTapTime = 0;
+        document.addEventListener('touchend', function(e) {
+            // Ignore taps on buttons, inputs, SVG icons, or inside form controls
+            if (e.target.closest('button, input, svg, a, datalist')) return;
+
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTapTime;
+
+            if (tapLength < 300 && tapLength > 0) {
+                togglePrivacyMode();
+                e.preventDefault();
+            }
+            lastTapTime = currentTime;
+        });
+
+        // Desktop Double-Click Support
+        document.addEventListener('dblclick', function(e) {
+            if (e.target.closest('button, input, svg, a, datalist')) return;
+            togglePrivacyMode();
+        });
         
     </script>
 </body>
