@@ -441,8 +441,10 @@
             const moreBtn = document.getElementById('load-more-btn');
             moreBtn.style.display = hasMore ? 'block' : 'none';
         }
+
         // --- PHASE 3: Smart Batch Fetch & Cache ---
         async function loadInitialData() {
+            // STEP 1: INSTANT LOAD FROM CACHE
             const cachedCats = localStorage.getItem('expense_categories');
             if (cachedCats) populateDatalist(JSON.parse(cachedCats));
             
@@ -457,9 +459,8 @@
                 renderExpenses(cachedExpenses, cachedHasMore);
             }
 
-            const syncLimit = Math.max(cachedExpenses.length, 10);
-            // STEP 2: SILENT BACKGROUND FETCH 
-            const syncLimit = Math.max(cachedExpenses.length, 10);
+            // STEP 2: SILENT BACKGROUND FETCH (Syncs up to our current cached limit!)
+            const syncLimit = Math.max(cachedExpenses.length, 10); // Declared ONCE here
             try {
                 const res = await fetch(`${API_URL}?action=getInitialData&limit=${syncLimit}`);
                 const result = await res.json();
@@ -475,14 +476,12 @@
                     renderDashboard(data);
                     renderExpenses(data.expenses, data.hasMore);
                 } else {
-                    // NEW: Surface Google Apps Script backend errors cleanly in the UI
                     document.getElementById('expense-list').innerHTML = `<p style="color: var(--danger); text-align: center; padding: 20px;"><b>Backend Error:</b><br>${result.message}</p>`;
                     document.getElementById('load-more-btn').style.display = 'none';
                 }
             } catch (error) { 
                 console.error(error);
                 if (cachedExpenses.length === 0) {
-                    // NEW: Catch actual network dropouts
                     document.getElementById('expense-list').innerHTML = `<p style="color: var(--danger); text-align: center; padding: 20px;"><b>Network Error:</b><br>Could not reach server.</p>`;
                 }
             }
