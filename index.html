@@ -160,6 +160,20 @@
         font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000; border: none;
         }
         
+        /* --- PRIVACY BLUR FILTER --- */
+        [data-privacy="true"] #budget-label,
+        [data-privacy="true"] #budget-percent,
+        [data-privacy="true"] #time-percent,
+        [data-privacy="true"] #amount,
+        [data-privacy="true"] .td-amount,
+        [data-privacy="true"] .td-category,
+        [data-privacy="true"] .td-meta,
+        [data-privacy="true"] .carry-tooltip {
+            filter: blur(6px);
+            user-select: none;
+            transition: filter 0.25s ease;
+        }
+        
         #status-msg { text-align: center;
         font-size: 0.9rem; margin-top: 10px; color: #10b981; min-height: 20px; }
         #login-section { text-align: center; }
